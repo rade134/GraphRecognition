@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="staticlib">
+    <CLASSES>
+      <root url="file://C:/Program Files/OpenCv300/build/x64/vc12/staticlib" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

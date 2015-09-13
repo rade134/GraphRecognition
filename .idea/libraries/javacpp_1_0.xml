@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="javacpp-1.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/javacpp-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/javacv-1.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/opencv-3.0.0-1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
