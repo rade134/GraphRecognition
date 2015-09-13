@@ -3,6 +3,8 @@
 import Neural_Network.NeuralNetwork;
 import Neural_Network.NeuralNode;
 import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.opencv_features2d;
+import org.bytedeco.javacpp.opencv_features2d.*;
 import sun.misc.FloatingDecimal;
 
 import javax.imageio.ImageIO;
@@ -95,29 +97,72 @@ public class SetupNeural {
         /* javacv stuff */
 
         NumberRecognition n = new NumberRecognition();
-        n.trainKNN();
-        /*
-        IplImage image = cvLoadImage("p7.png");
-        IplImage scan = cvLoadImage("scan0001.tif");
+        /*try {
+            n.trainWithImage("mnistData.bmp","mnistRes.bmp");
+            System.out.println(n.classify("one.png"));
+        }catch (Exception e){
+            e.printStackTrace();
+        }*/
+
+        IplImage image = cvLoadImage("35.png");
+        IplImage scan = cvLoadImage("scan0007.tif");
         //IplImage src = cvLoadImage("line2.png");
         //cvResize(image,src);
-        IplImage imageToUse = scan;
+        IplImage imageToUse = image;
         int maxHW = imageToUse.height();
-        double ratio = (double)512/maxHW;
+        double ratio = (double)256/maxHW;
         CvSize size = imageToUse.cvSize();
         size.height((int)Math.round(imageToUse.height() * ratio));
         size.width((int)Math.round(imageToUse.width() * ratio));
         System.out.println(size.height() + " " + size.width());
 
         IplImage src = cvCreateImage(size,8,3);
-        cvResize(imageToUse,src);
+        //cvResize(imageToUse,src);
+        src = imageToUse;
+
         /*Hough imageAnalyse = new Hough(src);
         imageAnalyse.getCircles();
         imageAnalyse.getLines();
         imageAnalyse.showImage();
 
-        houghLookDown imageAnalyse = new houghLookDown(src);
-        */
+*/
+
+        SimpleBlobDetector.Params params = new SimpleBlobDetector.Params();
+        // Change thresholds
+        params.minThreshold(50);
+        params.maxThreshold(500);
+// Filter by Circularity
+        params.filterByCircularity(false);
+        //params.minCircularity((float)0.1);
+
+// Filter by Convexity
+        params.filterByConvexity(false);
+        //params.minConvexity((float)0.87);
+
+// Filter by Inertia
+        params.filterByInertia(false);
+        //params.minInertiaRatio((float)0.01);
+        Mat blob = new Mat(src);
+        KeyPoint kp = new KeyPoint();
+        blur(blob, blob, new Size(6, 6), new Point(-1,-1),BORDER_DEFAULT);
+        threshold(blob,blob,230,255,CV_THRESH_BINARY);
+
+// Filter by Area.
+        params.filterByArea(false);
+        params.minArea(100);
+        SimpleBlobDetector det = new SimpleBlobDetector(params);
+
+        det.detect(blob, kp);
+
+
+        imshow("blob: ", blob);
+        cvWaitKey();
+
+        opencv_features2d.drawKeypoints(blob, kp, blob, new Scalar(0, 255), DrawMatchesFlags.DRAW_RICH_KEYPOINTS);
+        imshow("blob: ",blob);
+        cvWaitKey();
+        //houghLookDown imageAnalyse = new houghLookDown(src);
+
         /*
         IplImage grey = cvCreateImage(cvGetSize(src), 8, 1);
         cvCvtColor(src, grey, CV_BGR2GRAY);

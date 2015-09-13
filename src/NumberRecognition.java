@@ -24,52 +24,40 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvCvtColor;
  * Created by Jayden on 9/1/2015.
  */
 public class NumberRecognition {
-    CvKNearest knn;
+    private CvKNearest knn;
 
     public NumberRecognition() {
-
-    }
-    public void trainKNN() {
-        int a = 28*28;
-        int b = 28*28;
-        CvMat matStorage = CvMat.create(a,b,CV_32FC1);
-        double[] giveMe = new double[b];
-        for (int i=0; i < a ; i++ ) {
-            for (int j=0; j < b; j++ ) {
-                giveMe[j] = randDouble();
-                //System.out.println(giveMe[j]);
-            }
-            matStorage.put(i*28*28,giveMe);
-            //System.out.println(i*28*28);
-            //cvShowImage("wooo: ",matStorage);
-            //cvWaitKey();
-        }
-
         knn = new CvKNearest();
-        //trainWithMnistFiles();
-        Mat data = imread("minstData.png");
-        Mat res = imread("mnistRes.png");
-        data.convertTo(data,CV_32FC1,1.0 / 255.0, 0);
-        data = data.reshape(1,data.cols()*data.rows());
-        transpose(data, data);
-        res = res.reshape(1,res.cols()*res.rows());
-        transpose(res, res);
-        res.convertTo(res,CV_32FC1,1.0 / 255.0, 0);
-        knn.train(data.asCvMat(),res.asCvMat());
-        //trainWithMnistFiles(3000,false);
-        System.out.println(knn.get_sample_count() + " " + knn.get_var_count() + " " + knn.get_max_k());
+    }
+    public double classify(String s) throws Exception{
+        return classify(s,2);
+    }
+    public double classify(String s,int k) throws Exception{
+        if ( knn.get_sample_count() != 0 ) {
+            IplImage image = cvLoadImage(s, CV_32FC1);
+            if ( image == null ) throw new Exception(s+" not a recognised image");
+            IplImage grey = cvCreateImage(cvGetSize(image), 8, 1);
+            cvCvtColor(image, grey, CV_BGR2GRAY);
+            Mat sample2 = new Mat(grey.asCvMat());
 
-        IplImage image = cvLoadImage("MNIST_Database_ARGB/5_02541.png",CV_32FC1);
-        IplImage grey = cvCreateImage(cvGetSize(image), 8, 1);
-        cvCvtColor(image, grey, CV_BGR2GRAY);
-        Mat sample2 = new Mat(grey.asCvMat());
+            sample2.convertTo(sample2, CV_32FC1, 1.0 / 255.0, 0);
+            sample2 = sample2.reshape(1, sample2.cols() * sample2.rows());
+            transpose(sample2, sample2);
+            return knn.find_nearest(sample2.asCvMat(), k);
+        }else {
+            throw new Exception("Network hasn't been trained");
+        }
+    }
+    public void trainWithImage(String dataS,String resS) {
+        Mat data = imread(dataS);
+        Mat res = imread(resS);
 
-        sample2.convertTo(sample2, CV_32FC1, 1.0 / 255.0, 0);
+        cvtColor(data,data,CV_BGR2GRAY);
+        cvtColor(res,res,CV_BGR2GRAY);
+        data.convertTo(data, CV_32FC1);
+        res.convertTo(res, CV_32FC1);
 
-        sample2 = sample2.reshape(1,sample2.cols()*sample2.rows());
-        transpose(sample2, sample2);
-        System.out.println(knn.find_nearest(sample2.asCvMat(), knn.get_max_k()));
-
+        knn.train(data, res);
     }
     public void trainWithMnistFiles() {
         FileInputStream inImage = null;
@@ -97,10 +85,11 @@ public class NumberRecognition {
 
             int numberOfPixels = numberOfRows * numberOfColumns;
             double[] imgPixels = new double[numberOfPixels];
-            CvMat matStorage = CvMat.create(3000 ,numberOfColumns*numberOfRows,CV_32FC1);
-            CvMat results = CvMat.create(3000,1,CV_32FC1);
+            int numImages = 3000;
+            CvMat matStorage = CvMat.create(numberOfImages ,numberOfColumns*numberOfRows,CV_32FC1);
+            CvMat results = CvMat.create(numberOfImages,1,CV_32FC1);
 
-            for(int i=0; i < 3000; i++) {
+            for(int i=0; i < numberOfImages; i++) {
                 for(int p = 0; p < numberOfPixels; p++) {
                     double gray = 255 - inImage.read();
                     //imgPixels[p] = 0xFF000000 | (gray<<16) | (gray<<8) | gray;
@@ -133,10 +122,19 @@ public class NumberRecognition {
                 //ImageIO.write(image, "png", outputfile);
             }
             knn.train(matStorage, results);
-            cvShowImage("All data",matStorage);
-            cvWaitKey();
-            imwrite("mnistData.png",new Mat(matStorage,true));
-            imwrite("mnistRes.png",new Mat(results,true));
+            //cvShowImage("hmm:",results);
+            //cvWaitKey();
+
+            Mat toSaveData = new Mat(matStorage);
+            toSaveData.convertTo(toSaveData,CV_8UC4);
+            imwrite("mnistData.bmp", toSaveData);
+
+            Mat toSaveRes = new Mat(results);
+            toSaveRes.convertTo(toSaveRes, CV_8UC4);
+            imwrite("mnistRes.bmp",toSaveRes);
+
+            //imwrite("mnistData.png",new Mat(matStorage,true));
+            //imwrite("mnistRes.png",new Mat(results,true));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
