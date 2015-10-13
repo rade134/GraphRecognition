@@ -413,7 +413,7 @@ public class FaceRecognition {
     cvWriteInt(
             fileStorage, // fs
             "nPersons", // name
-            nPersons); // value
+            nPersons); // id
 
     for (i = 0; i < nPersons; i++) {
       String varname = "personName_" + (i + 1);
@@ -428,22 +428,22 @@ public class FaceRecognition {
     cvWriteInt(
             fileStorage, // fs
             "nEigens", // name
-            nEigens); // value
+            nEigens); // id
 
     cvWriteInt(
             fileStorage, // fs
             "nTrainFaces", // name
-            nTrainFaces); // value
+            nTrainFaces); // id
 
     cvWrite(
             fileStorage, // fs
             "trainPersonNumMat", // name
-            personNumTruthMat); // value
+            personNumTruthMat); // id
 
     cvWrite(
             fileStorage, // fs
             "eigenValMat", // name
-            eigenValMat); // value
+            eigenValMat); // id
 
     cvWrite(
             fileStorage, // fs
@@ -452,14 +452,14 @@ public class FaceRecognition {
 
     cvWrite(fileStorage, // fs
             "avgTrainImg", // name
-            pAvgTrainImg); // value
+            pAvgTrainImg); // id
 
     for (i = 0; i < nEigens; i++) {
       String varname = "eigenVect_" + i;
       cvWrite(
               fileStorage, // fs
               varname, // name
-              eigenVectArr[i]); // value
+              eigenVectArr[i]); // id
     }
 
     // release the file-storage interface
@@ -652,10 +652,10 @@ public class FaceRecognition {
     return null;
   }
 
-  /** Find the most likely person based on a detection. Returns the index, and stores the confidence value into pConfidence.
+  /** Find the most likely person based on a detection. Returns the index, and stores the confidence id into pConfidence.
    *
    * @param projectedTestFace the projected test face
-   * @param pConfidencePointer a pointer containing the confidence value
+   * @param pConfidencePointer a pointer containing the confidence id
    * @param iTestFace the test face index
    * @return the index
    */

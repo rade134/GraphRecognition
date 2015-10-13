@@ -1,0 +1,7 @@
+thickening up lines
+removing circles for better line detection
+   - treat hough circles like contours
+using find contours for lines instead of the hough
+
+bugs - lines still detected between circles horizontally not allowed
+circles inside each other can be merged

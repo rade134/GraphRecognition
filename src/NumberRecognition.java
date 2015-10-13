@@ -32,10 +32,18 @@ public class NumberRecognition {
     public double classify(String s) throws Exception{
         return classify(s,2);
     }
+    public double classify(IplImage image) throws Exception{
+        return classify(image,2);
+    }
     public double classify(String s,int k) throws Exception{
+        IplImage image = cvLoadImage(s, CV_32FC1);
+        if ( image == null ) throw new Exception(s+" not a recognised image");
+        return classify(image,k);
+    }
+    public double classify(IplImage image, int k) throws Exception{
         if ( knn.get_sample_count() != 0 ) {
-            IplImage image = cvLoadImage(s, CV_32FC1);
-            if ( image == null ) throw new Exception(s+" not a recognised image");
+            //convert image to 28x28
+
             IplImage grey = cvCreateImage(cvGetSize(image), 8, 1);
             cvCvtColor(image, grey, CV_BGR2GRAY);
             Mat sample2 = new Mat(grey.asCvMat());
@@ -43,6 +51,8 @@ public class NumberRecognition {
             sample2.convertTo(sample2, CV_32FC1, 1.0 / 255.0, 0);
             sample2 = sample2.reshape(1, sample2.cols() * sample2.rows());
             transpose(sample2, sample2);
+            //cvShowImage("name",sample2.asCvMat());
+            //cvWaitKey();
             return knn.find_nearest(sample2.asCvMat(), k);
         }else {
             throw new Exception("Network hasn't been trained");
